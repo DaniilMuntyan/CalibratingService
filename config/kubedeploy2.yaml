@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: calibrating-multi-pod
+    labels:
+        io.kompose.service: postgres
+        app   : calibrating
+        end   : prod
+        owner : DaniilMuntian
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            io.kompose.service: postgres
+    template:
+        metadata:
+            labels:
+                io.kompose.network/back-tier: "true"
+                io.kompose.service: postgres
+        spec:
+            containers:
+                - name  : calibrating-app
+                  image : muntian/calibrating:v1
+                  ports :
+                    - containerPort: 8080
+                  
+                - name  : calibrating-db
+                  image : postgres:latest
+                  ports :
+                    - containerPort: 5432
+                  env:
+                    - name: "POSTGRES_PASSWORD"
+                      value: "postgres"
+                    - name: "POSTGRES_USER"
+                      value: "postgres"
+                    - name: "POSTGRES_DB"
+                      value: "calibratingdb"
+                      
+            restartPolicy: Always
